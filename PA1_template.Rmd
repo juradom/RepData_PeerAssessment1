@@ -7,9 +7,9 @@ output: html_document
 ***********************************************************************
 ####What is mean total number of steps taken per day?
 
+##### Process Activity Data
 ```{r}
 
-options(digits = 6)
 # download file and unzip file
 if(!file.exists("activity.csv")){
     unzip(zipfile="activity.zip")
@@ -18,13 +18,16 @@ if(!file.exists("activity.csv")){
 activity.data <- read.csv("activity.csv",
                           colClasses = c("numeric", "Date","numeric")
                           )
-# remove NAs
+# aggregate steps per day
 activity.agg <- aggregate(steps ~ date, activity.data, 
                           sum)
-# create histogram
+```
+##### Create histogram
+```{r}
+
 hist(activity.agg$steps, main = "Frequency Of Total Steps Taken Per Day", xlab = "Total Steps Per Day", ylab = "Frequency", ylim = c(0,30))
 ```
-#####
+##### Calculate mean and median of total steps per day
 ```{r}
 # calculate the mean total steps per day
 meanSteps <- mean(activity.agg$steps)
@@ -33,3 +36,21 @@ medianSteps <- median(activity.agg$steps)
 ```
 The mean of the total steps per day is: `r meanSteps `.
 The median of the total steps per day is: `r medianSteps `.
+
+####What is the average daily activity pattern?
+##### Create Avg Steps Per Interval Plot
+```{r}
+# aggregate the average steps per 5 minute interval
+activity.mean <- aggregate(steps ~ interval, activity.data, 
+                          mean)
+# create time-series plot
+plot(activity.mean$interval, activity.mean$steps, main = "Average Steps Per Interval", xlab = "Interval", ylab = "Avg Steps")
+
+```
+
+##### Find the interval that contains the max number of steps.
+```{r}
+max.steps.interval <- activity.mean[activity.mean['steps']==max(activity.mean$steps)]
+max.interval <- max.steps.interval[1]
+```
+The interval that contains the max number of steps is: `r max.interval`.
