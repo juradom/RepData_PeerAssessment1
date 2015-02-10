@@ -1,25 +1,35 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: 'Peer Assessment 1: Activity Monitoring'
+author: "juradom"
+date: "February 5, 2015"
+output: html_document
 ---
+***********************************************************************
+####What is mean total number of steps taken per day?
 
+```{r}
 
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
-
-
-## Imputing missing values
-
-
-
-## Are there differences in activity patterns between weekdays and weekends?
+options(digits = 6)
+# download file and unzip file
+if(!file.exists("activity.csv")){
+    unzip(zipfile="activity.zip")
+}
+# read activity data
+activity.data <- read.csv("activity.csv",
+                          colClasses = c("numeric", "Date","numeric")
+                          )
+# remove NAs
+activity.agg <- aggregate(steps ~ date, activity.data, 
+                          sum)
+# create histogram
+hist(activity.agg$steps, main = "Frequency Of Total Steps Taken Per Day", xlab = "Total Steps Per Day", ylab = "Frequency", ylim = c(0,30))
+```
+#####
+```{r}
+# calculate the mean total steps per day
+meanSteps <- mean(activity.agg$steps)
+# calculate the median total steps per day
+medianSteps <- median(activity.agg$steps)
+```
+The mean of the total steps per day is: `r meanSteps `.
+The median of the total steps per day is: `r medianSteps `.
