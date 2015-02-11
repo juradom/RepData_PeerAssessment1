@@ -19,14 +19,21 @@ activity.data <- read.csv("activity.csv",
                           colClasses = c("numeric", "Date","numeric")
                           )
 # aggregate steps per day
-activity.agg <- aggregate(steps ~ date, activity.data, 
+activity.agg <- aggregate(steps ~ date, 
+                          activity.data, 
                           sum)
 ```
+
 ##### Create histogram
 ```{r}
 
-hist(activity.agg$steps, main = "Frequency Of Total Steps Taken Per Day", xlab = "Total Steps Per Day", ylab = "Frequency", ylim = c(0,30))
+hist(activity.agg$steps, 
+     main = "Frequency Of Total Steps Taken Per Day", 
+     xlab = "Total Steps Per Day", 
+     ylab = "Frequency", 
+     ylim = c(0,30))
 ```
+
 ##### Calculate mean and median of total steps per day
 ```{r}
 # calculate the mean total steps per day
@@ -37,14 +44,19 @@ medianSteps <- median(activity.agg$steps)
 The mean of the total steps per day is: `r meanSteps `.
 The median of the total steps per day is: `r medianSteps `.
 
+***********************************************************************
 ####What is the average daily activity pattern?
 ##### Create Avg Steps Per Interval Plot
 ```{r}
 # aggregate the average steps per 5 minute interval
-activity.mean <- aggregate(steps ~ interval, activity.data, 
-                          mean)
+activity.mean <- aggregate(steps ~ interval, 
+                           activity.data, 
+                           mean)
 # create time-series plot
-plot(activity.mean$interval, activity.mean$steps, main = "Average Steps Per Interval", xlab = "Interval", ylab = "Avg Steps")
+plot(activity.mean$interval, activity.mean$steps, 
+     main = "Average Steps Per Interval", 
+     xlab = "Interval", 
+     ylab = "Avg Steps")
 
 ```
 
@@ -54,3 +66,48 @@ max.steps.interval <- activity.mean[activity.mean['steps']==max(activity.mean$st
 max.interval <- max.steps.interval[1]
 ```
 The interval that contains the max number of steps is: `r max.interval`.
+
+***********************************************************************
+####Imputing missing values
+
+#####Calculate the total number of missing values
+```{r}
+library(plyr)
+# find rows with NAs
+missing.activities.counts <- nrow(count(which(is.na(activity.data))))
+```
+The total number of missing values in the dataset is: `r missing.activities.counts `.
+
+#####Populates NAs with average steps for that 5 min interval
+```{r}
+library(dplyr)
+imput.activity.data <- merge(activity.data, activity.mean, by.x = "interval", by.y ="interval")
+complete.activity.data <- imput.activity.data %>%
+    group_by(interval) %>%
+    mutate(steps.x = ifelse(is.na(steps.x),
+                          steps.y,
+                          steps.x))
+
+```
+##### Create histogram
+```{r}
+# aggregate steps per day
+complete.activity.agg <- aggregate(steps.x ~ date, 
+                          complete.activity.data, 
+                          sum)
+
+hist(complete.activity.agg$steps.x, 
+     main = "Frequency Of Total Steps Taken Per Day", 
+     xlab = "Total Steps Per Day", 
+     ylab = "Frequency")
+```
+
+##### Calculate mean and median of total steps per day
+```{r}
+# calculate the mean total steps per day
+meanCompleteSteps <- mean(complete.activity.agg$steps)
+# calculate the median total steps per day
+medianCompleteSteps <- median(complete.activity.agg$steps)
+```
+The mean of the total steps per day is: `r meanCompleteSteps `.
+The median of the total steps per day is: `r medianCompleteSteps `.
