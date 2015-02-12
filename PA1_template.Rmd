@@ -7,7 +7,7 @@ output: html_document
 ***********************************************************************
 ####What is mean total number of steps taken per day?
 
-##### Process Activity Data
+1) Process Activity Data
 ```{r}
 
 # download file and unzip file
@@ -24,7 +24,7 @@ activity.agg <- aggregate(steps ~ date,
                           sum)
 ```
 
-##### Create histogram
+2) Create histogram
 ```{r}
 
 hist(activity.agg$steps, 
@@ -34,7 +34,7 @@ hist(activity.agg$steps,
      ylim = c(0,30))
 ```
 
-##### Calculate mean and median of total steps per day
+3) Calculate mean and median of total steps per day
 ```{r}
 # calculate the mean total steps per day
 meanSteps <- mean(activity.agg$steps)
@@ -46,7 +46,7 @@ The median of the total steps per day is: `r medianSteps `.
 
 ***********************************************************************
 ####What is the average daily activity pattern?
-##### Create Avg Steps Per Interval Plot
+1)  Create Avg Steps Per Interval Plot
 ```{r}
 # aggregate the average steps per 5 minute interval
 activity.mean <- aggregate(steps ~ interval, 
@@ -60,7 +60,7 @@ plot(activity.mean$interval, activity.mean$steps,
 
 ```
 
-##### Find the interval that contains the max number of steps.
+2) Find the interval that contains the max number of steps.
 ```{r}
 max.steps.interval <- activity.mean[activity.mean['steps']==max(activity.mean$steps)]
 max.interval <- max.steps.interval[1]
@@ -70,7 +70,7 @@ The interval that contains the max number of steps is: `r max.interval`.
 ***********************************************************************
 ####Imputing missing values
 
-#####Calculate the total number of missing values
+1) Calculate the total number of missing values
 ```{r}
 library(plyr)
 # find rows with NAs
@@ -78,7 +78,7 @@ missing.activities.counts <- nrow(count(which(is.na(activity.data))))
 ```
 The total number of missing values in the dataset is: `r missing.activities.counts `.
 
-#####Populates NAs with average steps for that 5 min interval
+2) Populates NAs with average steps for that 5 min interval
 ```{r}
 library(dplyr)
 imput.activity.data <- merge(activity.data, activity.mean, by.x = "interval", by.y ="interval")
@@ -89,7 +89,7 @@ complete.activity.data <- imput.activity.data %>%
                           steps.x))
 
 ```
-##### Create histogram
+3) Create histogram
 ```{r}
 # aggregate steps per day
 complete.activity.agg <- aggregate(steps.x ~ date, 
@@ -102,7 +102,7 @@ hist(complete.activity.agg$steps.x,
      ylab = "Frequency")
 ```
 
-##### Calculate mean and median of total steps per day
+4) Calculate mean and median of total steps per day
 ```{r}
 # calculate the mean total steps per day
 meanCompleteSteps <- mean(complete.activity.agg$steps)
@@ -111,3 +111,32 @@ medianCompleteSteps <- median(complete.activity.agg$steps)
 ```
 The mean of the total steps per day is: `r meanCompleteSteps `.
 The median of the total steps per day is: `r medianCompleteSteps `.
+
+***********************************************************************
+####Are there differences in activity patterns between weekdays and weekends?
+
+1) Create time-series plot
+```{r}
+library(data.table)
+library(lattice)
+
+# Create weekday/weekend factor variable
+weekday.activity <- data.table(complete.activity.data)
+weekday.activity <- weekday.activity[,weekpart := ifelse(weekdays(date)  %in% c("Saturday", "Sunday"),"weekend","weekday")]
+
+# Create time-series plot
+# aggregate the average steps per 5 minute interval
+weekday.activity.mean <- aggregate(steps.x ~ interval + weekpart, 
+                           weekday.activity, 
+                           mean)
+# create time-series plot
+xyplot(steps.x ~ interval | weekpart , 
+       data=weekday.activity.mean,
+       layout=c(1,2),
+       ylab="Number Of Steps",
+       xlab="Interval",
+       type="l")
+
+```
+
+
